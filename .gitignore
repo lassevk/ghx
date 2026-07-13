@@ -1,0 +1,10 @@
+# Kompilert binær
+/ghx
+/ghx.exe
+
+# Testartefakter
+*.out
+*.test
+
+# Editor/OS
+.DS_Store
