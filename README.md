@@ -1,20 +1,20 @@
 # ghx
 
-En tynn wrapper rundt [`gh`](https://cli.github.com/) som velger riktig
-personal access token (PAT) automatisk ut fra hvilket repo du står i.
+A thin wrapper around [`gh`](https://cli.github.com/) that automatically picks
+the right personal access token (PAT) based on which repository you're in.
 
-## Problemet
+## The problem
 
-`gh` kan bytte mellom ulike GitHub-*kontoer*, men ikke mellom flere *tilganger
-for samme konto*. Når man må bruke PAT-er (f.eks. fordi konto-wide innlogging
-ikke er tillatt), og har flere owner-e (org-er/brukere) side om side, blir det
-tungvint å jonglere hvilket token som gjelder hvor.
+`gh` can switch between different GitHub *accounts*, but not between multiple
+*accesses for the same account*. When you have to use PATs (e.g. because
+account-wide login isn't permitted), and you have several owners (orgs/users)
+side by side, juggling which token applies where becomes tedious.
 
-`ghx` løser det: den leser `origin`-remoten, finner owneren, slår opp riktig
-PAT i en config-fil, setter den som `GH_TOKEN`, og kjører `gh` med alle
-argumenter uendret.
+`ghx` solves this: it reads the `origin` remote, determines the owner, looks up
+the right PAT in a config file, sets it as `GH_TOKEN`, and runs `gh` with all
+arguments passed through unchanged.
 
-## Bruk
+## Usage
 
 ```sh
 ghx pr list
@@ -22,16 +22,16 @@ ghx api /user
 ghx issue view 42
 ```
 
-Alt sendes rett videre til `gh`, med `GH_TOKEN` satt til owner-ens token.
-`ghx` krever å stå i et github.com-repo med en kjent owner — ellers feiler den
-og kjører aldri `gh` (ingen risiko for feil konto).
+Everything is forwarded straight to `gh`, with `GH_TOKEN` set to the owner's
+token. `ghx` requires being inside a github.com repository with a known owner —
+otherwise it fails and never runs `gh` (no risk of using the wrong account).
 
-Sett `GHX_DEBUG=1` for å se hvilken owner som ble utledet.
+Set `GHX_DEBUG=1` to see which owner was resolved.
 
-## Oppsett
+## Setup
 
-1. Bygg: `go build -o ghx .` og legg binæren i PATH.
-2. Opprett `~/.config/ghx/config.toml` (se `config.example.toml`):
+1. Build: `go build -o ghx .` and put the binary on your PATH.
+2. Create `~/.config/ghx/config.toml` (see `config.example.toml`):
 
    ```toml
    [owners]
@@ -39,12 +39,12 @@ Sett `GHX_DEBUG=1` for å se hvilken owner som ble utledet.
    "larvik-kommune" = "ghp_..."
    ```
 
-3. Sikre fila: `chmod 600 ~/.config/ghx/config.toml`.
+3. Secure the file: `chmod 600 ~/.config/ghx/config.toml`.
 
-Nøkkelen er GitHub-owner (org/bruker) fra origin-URL-en; oppslag er
-case-insensitivt. Respekterer `$XDG_CONFIG_HOME`.
+The key is the GitHub owner (org/user) from the origin URL; lookup is
+case-insensitive. Respects `$XDG_CONFIG_HOME`.
 
 ## Status
 
-MVP kjører på macOS/Linux via `syscall.Exec`. Windows-støtte kommer
+MVP runs on macOS/Linux via `syscall.Exec`. Windows support is pending
 ([#8](https://github.com/lassevk/ghx/issues/8)).

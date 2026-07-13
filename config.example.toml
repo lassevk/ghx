@@ -1,9 +1,9 @@
-# Eksempel på ~/.config/ghx/config.toml
+# Example ~/.config/ghx/config.toml
 #
-# Kopier til ~/.config/ghx/config.toml og sett `chmod 600` på fila.
-# Nøkkelen er GitHub-owner (org eller bruker) slik den står i origin-URL-en.
-# Oppslag er case-insensitivt. Verdien er en personal access token (PAT).
+# Copy to ~/.config/ghx/config.toml and set `chmod 600` on the file.
+# The key is the GitHub owner (org or user) as it appears in the origin URL.
+# Lookup is case-insensitive. The value is a personal access token (PAT).
 
 [owners]
-lassevk          = "ghp_ditt_personlige_token_her"
-"larvik-kommune" = "ghp_ditt_jobb_token_her"
+lassevk          = "ghp_your_personal_token_here"
+"larvik-kommune" = "ghp_your_work_token_here"
