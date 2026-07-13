@@ -18,7 +18,7 @@ import (
 func execGh(args []string, token string) error {
 	ghPath, err := exec.LookPath("gh")
 	if err != nil {
-		return fmt.Errorf("gh finnes ikke i PATH")
+		return fmt.Errorf("gh not found in PATH")
 	}
 
 	argv := append([]string{ghPath}, args...)

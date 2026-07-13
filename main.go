@@ -44,10 +44,10 @@ func run(args []string) error {
 
 	token, ok := tokens[owner]
 	if !ok {
-		return fmt.Errorf("owner '%s' er ikke konfigurert i %s (repo: %s)", owner, configPath(), url)
+		return fmt.Errorf("owner '%s' is not configured in %s (repo: %s)", owner, configPath(), url)
 	}
 	if debug {
-		fmt.Fprintf(os.Stderr, "ghx: token funnet for owner '%s'\n", owner)
+		fmt.Fprintf(os.Stderr, "ghx: token found for owner '%s'\n", owner)
 	}
 
 	// execGh returnerer bare hvis noe gikk galt før gh overtok prosessen.

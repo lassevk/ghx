@@ -18,7 +18,7 @@ import (
 func parseOwner(remoteURL string) (string, error) {
 	s := strings.TrimSpace(remoteURL)
 	if s == "" {
-		return "", fmt.Errorf("tom remote-URL")
+		return "", fmt.Errorf("empty remote URL")
 	}
 
 	var host, path string
@@ -31,7 +31,7 @@ func parseOwner(remoteURL string) (string, error) {
 		}
 		slash := strings.Index(rest, "/")
 		if slash == -1 {
-			return "", fmt.Errorf("klarte ikke tolke remote-URL: %s", s)
+			return "", fmt.Errorf("could not parse remote URL: %s", s)
 		}
 		host, path = rest[:slash], rest[slash+1:]
 		if colon := strings.Index(host, ":"); colon != -1 {
@@ -48,18 +48,18 @@ func parseOwner(remoteURL string) (string, error) {
 		host, path = hostAndPath[:colon], hostAndPath[colon+1:]
 
 	default:
-		return "", fmt.Errorf("klarte ikke tolke remote-URL: %s", s)
+		return "", fmt.Errorf("could not parse remote URL: %s", s)
 	}
 
 	if strings.ToLower(host) != "github.com" {
-		return "", fmt.Errorf("origin er ikke et github.com-repo: %s", s)
+		return "", fmt.Errorf("origin is not a github.com repository: %s", s)
 	}
 
 	path = strings.TrimPrefix(path, "/")
 	owner, _, _ := strings.Cut(path, "/")
 	owner = strings.TrimSuffix(owner, ".git")
 	if owner == "" {
-		return "", fmt.Errorf("klarte ikke utlede owner fra origin: %s", s)
+		return "", fmt.Errorf("could not determine owner from origin: %s", s)
 	}
 	return strings.ToLower(owner), nil
 }

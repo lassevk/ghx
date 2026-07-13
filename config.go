@@ -39,14 +39,14 @@ func loadConfig() (map[string]string, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("fant ikke config: %s", path)
+			return nil, fmt.Errorf("config file not found: %s", path)
 		}
-		return nil, fmt.Errorf("kunne ikke lese config %s: %w", path, err)
+		return nil, fmt.Errorf("could not read config %s: %w", path, err)
 	}
 
 	var c config
 	if err := toml.Unmarshal(data, &c); err != nil {
-		return nil, fmt.Errorf("ugyldig config %s: %w", path, err)
+		return nil, fmt.Errorf("invalid config %s: %w", path, err)
 	}
 
 	tokens := make(map[string]string, len(c.Owners))

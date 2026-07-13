@@ -43,15 +43,15 @@ func TestParseOwner(t *testing.T) {
 			got, err := parseOwner(tt.url)
 			if tt.wantErr {
 				if err == nil {
-					t.Fatalf("parseOwner(%q) = %q, forventet feil", tt.url, got)
+					t.Fatalf("parseOwner(%q) = %q, expected error", tt.url, got)
 				}
 				return
 			}
 			if err != nil {
-				t.Fatalf("parseOwner(%q) uventet feil: %v", tt.url, err)
+				t.Fatalf("parseOwner(%q) unexpected error: %v", tt.url, err)
 			}
 			if got != tt.want {
-				t.Errorf("parseOwner(%q) = %q, forventet %q", tt.url, got, tt.want)
+				t.Errorf("parseOwner(%q) = %q, expected %q", tt.url, got, tt.want)
 			}
 		})
 	}

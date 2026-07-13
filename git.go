@@ -20,11 +20,11 @@ func gitOriginURL() (string, error) {
 		msg := stderr.String()
 		switch {
 		case strings.Contains(msg, "not a git repository"):
-			return "", fmt.Errorf("ikke inne i et git-repo")
+			return "", fmt.Errorf("not inside a git repository")
 		case strings.Contains(strings.ToLower(msg), "no such remote"):
-			return "", fmt.Errorf("repoet har ingen 'origin' remote")
+			return "", fmt.Errorf("repository has no 'origin' remote")
 		default:
-			return "", fmt.Errorf("git remote get-url origin feilet: %v: %s", err, strings.TrimSpace(msg))
+			return "", fmt.Errorf("git remote get-url origin failed: %v: %s", err, strings.TrimSpace(msg))
 		}
 	}
 	return strings.TrimSpace(string(out)), nil
