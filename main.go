@@ -56,8 +56,8 @@ func run(args []string) error {
 
 // buildEnv returnerer et miljø likt det gjeldende, men med GH_TOKEN satt til
 // token og eventuelle eksisterende GH_TOKEN/GITHUB_TOKEN fjernet, slik at det
-// ikke er tvil om hvilket token gh bruker. Plattform-nøytral så steg 2 (#8)
-// kan gjenbruke den.
+// ikke er tvil om hvilket token gh bruker. Plattform-nøytral og delt av
+// execGh på alle OS.
 func buildEnv(token string) []string {
 	base := os.Environ()
 	env := make([]string, 0, len(base)+1)

@@ -46,5 +46,6 @@ case-insensitive. Respects `$XDG_CONFIG_HOME`.
 
 ## Status
 
-MVP runs on macOS/Linux via `syscall.Exec`. Windows support is pending
-([#8](https://github.com/lassevk/ghx/issues/8)).
+Runs on Windows, macOS and Linux. `gh` is launched as a subprocess via
+`exec.Command`, with stdin/stdout/stderr wired through and its exit code
+propagated unchanged.
