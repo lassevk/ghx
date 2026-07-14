@@ -2,56 +2,60 @@ package main
 
 import "testing"
 
-func TestParseOwner(t *testing.T) {
+func TestParseOwnerRepo(t *testing.T) {
 	tests := []struct {
-		name    string
-		url     string
-		want    string
-		wantErr bool
+		name      string
+		url       string
+		wantOwner string
+		wantRepo  string
+		wantErr   bool
 	}{
 		// SCP-lignende SSH
-		{"scp med .git", "git@github.com:lassevk/ghx.git", "lassevk", false},
-		{"scp uten .git", "git@github.com:lassevk/ghx", "lassevk", false},
-		{"scp org", "git@github.com:Larvik-Kommune/foo.git", "larvik-kommune", false},
+		{"scp med .git", "git@github.com:lassevk/ghx.git", "lassevk", "ghx", false},
+		{"scp uten .git", "git@github.com:lassevk/ghx", "lassevk", "ghx", false},
+		{"scp org", "git@github.com:Larvik-Kommune/foo.git", "larvik-kommune", "foo", false},
 
 		// SSH-URL
-		{"ssh-url med .git", "ssh://git@github.com/lassevk/ghx.git", "lassevk", false},
-		{"ssh-url uten .git", "ssh://git@github.com/lassevk/ghx", "lassevk", false},
+		{"ssh-url med .git", "ssh://git@github.com/lassevk/ghx.git", "lassevk", "ghx", false},
+		{"ssh-url uten .git", "ssh://git@github.com/lassevk/ghx", "lassevk", "ghx", false},
 
 		// HTTPS
-		{"https med .git", "https://github.com/lassevk/ghx.git", "lassevk", false},
-		{"https uten .git", "https://github.com/lassevk/ghx", "lassevk", false},
-		{"https med port", "https://github.com:443/lassevk/ghx.git", "lassevk", false},
+		{"https med .git", "https://github.com/lassevk/ghx.git", "lassevk", "ghx", false},
+		{"https uten .git", "https://github.com/lassevk/ghx", "lassevk", "ghx", false},
+		{"https med port", "https://github.com:443/lassevk/ghx.git", "lassevk", "ghx", false},
 
-		// Case-insensitivitet
-		{"blandet case owner", "https://github.com/LasseVK/Ghx.git", "lassevk", false},
-		{"blandet case host", "git@GitHub.com:lassevk/ghx.git", "lassevk", false},
+		// Case-insensitivitet — både owner og repo lowercases
+		{"blandet case owner+repo", "https://github.com/LasseVK/Ghx.git", "lassevk", "ghx", false},
+		{"blandet case host", "git@GitHub.com:lassevk/ghx.git", "lassevk", "ghx", false},
+
+		// Owner uten repo → owner satt, repo tomt
+		{"owner uten repo", "git@github.com:lassevk", "lassevk", "", false},
 
 		// Ikke-github → feil
-		{"gitlab https", "https://gitlab.com/lassevk/ghx.git", "", true},
-		{"bitbucket scp", "git@bitbucket.org:lassevk/ghx.git", "", true},
-		{"enterprise", "git@github.larvik.no:lassevk/ghx.git", "", true},
+		{"gitlab https", "https://gitlab.com/lassevk/ghx.git", "", "", true},
+		{"bitbucket scp", "git@bitbucket.org:lassevk/ghx.git", "", "", true},
+		{"enterprise", "git@github.larvik.no:lassevk/ghx.git", "", "", true},
 
 		// Ugyldig → feil
-		{"tom", "", "", true},
-		{"tull", "bare-noe-tekst", "", true},
-		{"github uten owner", "https://github.com/", "", true},
+		{"tom", "", "", "", true},
+		{"tull", "bare-noe-tekst", "", "", true},
+		{"github uten owner", "https://github.com/", "", "", true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseOwner(tt.url)
+			owner, repo, err := parseOwnerRepo(tt.url)
 			if tt.wantErr {
 				if err == nil {
-					t.Fatalf("parseOwner(%q) = %q, expected error", tt.url, got)
+					t.Fatalf("parseOwnerRepo(%q) = (%q, %q), expected error", tt.url, owner, repo)
 				}
 				return
 			}
 			if err != nil {
-				t.Fatalf("parseOwner(%q) unexpected error: %v", tt.url, err)
+				t.Fatalf("parseOwnerRepo(%q) unexpected error: %v", tt.url, err)
 			}
-			if got != tt.want {
-				t.Errorf("parseOwner(%q) = %q, expected %q", tt.url, got, tt.want)
+			if owner != tt.wantOwner || repo != tt.wantRepo {
+				t.Errorf("parseOwnerRepo(%q) = (%q, %q), expected (%q, %q)", tt.url, owner, repo, tt.wantOwner, tt.wantRepo)
 			}
 		})
 	}
