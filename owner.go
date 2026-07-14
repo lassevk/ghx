@@ -5,18 +5,18 @@ import (
 	"strings"
 )
 
-// parseOwnerRepo utleder GitHub-owneren (org eller bruker) og repo-navnet fra
-// en git remote-URL.
+// parseOwnerRepo derives the GitHub owner (org or user) and the repo name from
+// a git remote URL.
 //
-// Støtter tre former:
-//   - SCP-lignende SSH: git@github.com:Owner/Repo.git
-//   - SSH-URL:          ssh://git@github.com/Owner/Repo.git
-//   - HTTPS:            https://github.com/Owner/Repo(.git)
+// It supports three forms:
+//   - SCP-like SSH: git@github.com:Owner/Repo.git
+//   - SSH URL:      ssh://git@github.com/Owner/Repo.git
+//   - HTTPS:        https://github.com/Owner/Repo(.git)
 //
-// Kun github.com aksepteres som host. Både owner og repo normaliseres til
-// lowercase siden GitHub behandler owner- og repo-navn case-insensitivt. En
-// eventuell «.git»-endelse strippes. Owner er alltid satt ved suksess; repo kan
-// være tomt dersom remote-URL-en ikke inneholder et repo-navn.
+// Only github.com is accepted as the host. Both owner and repo are normalized to
+// lowercase since GitHub treats owner and repo names case-insensitively. A
+// trailing ".git" suffix is stripped. Owner is always set on success; repo may
+// be empty if the remote URL contains no repo name.
 func parseOwnerRepo(remoteURL string) (owner, repo string, err error) {
 	s := strings.TrimSpace(remoteURL)
 	if s == "" {
@@ -41,7 +41,7 @@ func parseOwnerRepo(remoteURL string) (owner, repo string, err error) {
 		}
 
 	case strings.Contains(s, ":"):
-		// SCP-lignende: [user@]host:path
+		// SCP-like: [user@]host:path
 		hostAndPath := s
 		if at := strings.Index(s, "@"); at != -1 {
 			hostAndPath = s[at+1:]

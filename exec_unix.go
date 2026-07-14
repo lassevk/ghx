@@ -8,13 +8,13 @@ import (
 	"syscall"
 )
 
-// execGh erstatter gjeldende prosess med `gh`, med GH_TOKEN satt til token og
-// alle args uendret videre. På Unix bruker vi syscall.Exec slik at gh arver
-// stdin/stdout/stderr, tty, signaler og exit-kode native — den reneste formen
-// for transparent passthrough.
+// execGh replaces the current process with `gh`, with GH_TOKEN set to token and
+// all args passed through unchanged. On Unix we use syscall.Exec so that gh
+// inherits stdin/stdout/stderr, tty, signals and exit code natively — the
+// cleanest form of transparent passthrough.
 //
-// Ved suksess returnerer denne funksjonen aldri (prosessbildet er byttet ut).
-// Steg 2 (#8) bytter denne sømmen til exec.Command for Windows-støtte.
+// On success this function never returns (the process image is replaced).
+// Step 2 (#8) swaps this seam to exec.Command for Windows support.
 func execGh(args []string, token string) error {
 	ghPath, err := exec.LookPath("gh")
 	if err != nil {

@@ -9,35 +9,34 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-// config speiler ~/.config/ghx/config.toml:
+// config mirrors ~/.config/ghx/config.toml:
 //
 //	[tokens]
 //	lassevk          = "ghp_..."
 //	"larvik-kommune" = "ghp_..."
-//	"lassevk/ghx"    = "ghp_..."   # per-repo, overstyrer owner-token
+//	"lassevk/ghx"    = "ghp_..."   # per-repo, overrides the owner token
 //
-// Nøkkel uten «/» er owner-nivå; nøkkel med «/» er repo-spesifikk (owner/repo).
+// A key without "/" is owner-level; a key with "/" is repo-specific (owner/repo).
 type config struct {
 	Tokens map[string]string `toml:"tokens"`
 }
 
-// configPath returnerer stien til config-fila, med respekt for
-// $XDG_CONFIG_HOME.
+// configPath returns the path to the config file, respecting $XDG_CONFIG_HOME.
 func configPath() string {
 	if x := os.Getenv("XDG_CONFIG_HOME"); x != "" {
 		return filepath.Join(x, "ghx", "config.toml")
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		// Fall tilbake til en relativ sti; loadConfig gir en tydelig feil.
+		// Fall back to a relative path; loadConfig will report a clear error.
 		return filepath.Join(".config", "ghx", "config.toml")
 	}
 	return filepath.Join(home, ".config", "ghx", "config.toml")
 }
 
-// loadConfig leser og parser config-fila og returnerer en nøkkel→token-mapping
-// der nøklene (owner eller owner/repo) er normalisert til lowercase (matcher
-// owner/repo-parsingen).
+// loadConfig reads and parses the config file and returns a key->token mapping
+// where the keys (owner or owner/repo) are normalized to lowercase (matching
+// the owner/repo parsing).
 func loadConfig() (map[string]string, error) {
 	path := configPath()
 	data, err := os.ReadFile(path)
