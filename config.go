@@ -11,11 +11,14 @@ import (
 
 // config speiler ~/.config/ghx/config.toml:
 //
-//	[owners]
+//	[tokens]
 //	lassevk          = "ghp_..."
 //	"larvik-kommune" = "ghp_..."
+//	"lassevk/ghx"    = "ghp_..."   # per-repo, overstyrer owner-token
+//
+// Nøkkel uten «/» er owner-nivå; nøkkel med «/» er repo-spesifikk (owner/repo).
 type config struct {
-	Owners map[string]string `toml:"owners"`
+	Tokens map[string]string `toml:"tokens"`
 }
 
 // configPath returnerer stien til config-fila, med respekt for
@@ -32,8 +35,9 @@ func configPath() string {
 	return filepath.Join(home, ".config", "ghx", "config.toml")
 }
 
-// loadConfig leser og parser config-fila og returnerer en owner→token-mapping
-// der nøklene er normalisert til lowercase (matcher owner-parsingen).
+// loadConfig leser og parser config-fila og returnerer en nøkkel→token-mapping
+// der nøklene (owner eller owner/repo) er normalisert til lowercase (matcher
+// owner/repo-parsingen).
 func loadConfig() (map[string]string, error) {
 	path := configPath()
 	data, err := os.ReadFile(path)
@@ -49,9 +53,9 @@ func loadConfig() (map[string]string, error) {
 		return nil, fmt.Errorf("invalid config %s: %w", path, err)
 	}
 
-	tokens := make(map[string]string, len(c.Owners))
-	for owner, token := range c.Owners {
-		tokens[strings.ToLower(owner)] = token
+	tokens := make(map[string]string, len(c.Tokens))
+	for key, token := range c.Tokens {
+		tokens[strings.ToLower(key)] = token
 	}
 	return tokens, nil
 }

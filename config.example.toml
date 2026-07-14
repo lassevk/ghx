@@ -1,9 +1,19 @@
 # Example ~/.config/ghx/config.toml
 #
 # Copy to ~/.config/ghx/config.toml and set `chmod 600` on the file.
-# The key is the GitHub owner (org or user) as it appears in the origin URL.
-# Lookup is case-insensitive. The value is a personal access token (PAT).
+#
+# Each key maps to a personal access token (PAT). Lookup is case-insensitive.
+#   - A key WITHOUT a slash is an owner (org or user), e.g. "lassevk".
+#   - A key WITH a slash is a specific repo, e.g. "lassevk/ghx".
+#
+# For a given repo, ghx tries the "owner/repo" key first and falls back to the
+# "owner" key. The most specific match wins and replaces (does not supplement)
+# the owner token — handy for giving a single repo a more-privileged PAT
+# without widening access to every repo under that owner.
 
-[owners]
+[tokens]
 lassevk          = "ghp_your_personal_token_here"
 "larvik-kommune" = "ghp_your_work_token_here"
+
+# Per-repo override: a token used only for lassevk/ghx.
+"lassevk/ghx" = "ghp_token_scoped_to_this_repo"

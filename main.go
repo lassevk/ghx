@@ -29,12 +29,17 @@ func run(args []string) error {
 		fmt.Fprintf(os.Stderr, "ghx: origin = %s\n", url)
 	}
 
-	owner, err := parseOwner(url)
+	owner, repo, err := parseOwnerRepo(url)
 	if err != nil {
 		return err
 	}
+	repoKey := owner + "/" + repo
 	if debug {
-		fmt.Fprintf(os.Stderr, "ghx: owner = %s\n", owner)
+		if repo != "" {
+			fmt.Fprintf(os.Stderr, "ghx: repo = %s\n", repoKey)
+		} else {
+			fmt.Fprintf(os.Stderr, "ghx: owner = %s (no repo in origin)\n", owner)
+		}
 	}
 
 	tokens, err := loadConfig()
@@ -42,12 +47,28 @@ func run(args []string) error {
 		return err
 	}
 
-	token, ok := tokens[owner]
-	if !ok {
-		return fmt.Errorf("owner '%s' is not configured in %s (repo: %s)", owner, configPath(), url)
-	}
-	if debug {
-		fmt.Fprintf(os.Stderr, "ghx: token found for owner '%s'\n", owner)
+	// Mest spesifikk vinner: prøv owner/repo først, fall så tilbake til owner.
+	var token string
+	switch {
+	case repo != "" && tokens[repoKey] != "":
+		token = tokens[repoKey]
+		if debug {
+			fmt.Fprintf(os.Stderr, "ghx: token found for '%s' (repo-specific)\n", repoKey)
+		}
+	case tokens[owner] != "":
+		token = tokens[owner]
+		if debug {
+			label := "owner-level"
+			if repo != "" {
+				label = "owner-level fallback"
+			}
+			fmt.Fprintf(os.Stderr, "ghx: token found for '%s' (%s)\n", owner, label)
+		}
+	default:
+		if repo != "" {
+			return fmt.Errorf("no token configured for '%s' or '%s' in %s", repoKey, owner, configPath())
+		}
+		return fmt.Errorf("no token configured for '%s' in %s", owner, configPath())
 	}
 
 	// execGh returnerer bare hvis noe gikk galt før gh overtok prosessen.

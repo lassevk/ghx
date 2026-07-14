@@ -5,20 +5,22 @@ import (
 	"strings"
 )
 
-// parseOwner utleder GitHub-owneren (org eller bruker) fra en git remote-URL.
+// parseOwnerRepo utleder GitHub-owneren (org eller bruker) og repo-navnet fra
+// en git remote-URL.
 //
 // Støtter tre former:
 //   - SCP-lignende SSH: git@github.com:Owner/Repo.git
 //   - SSH-URL:          ssh://git@github.com/Owner/Repo.git
 //   - HTTPS:            https://github.com/Owner/Repo(.git)
 //
-// Kun github.com aksepteres som host. Owner normaliseres til lowercase siden
-// GitHub behandler owner-navn case-insensitivt. En eventuell «.git»-endelse
-// strippes.
-func parseOwner(remoteURL string) (string, error) {
+// Kun github.com aksepteres som host. Både owner og repo normaliseres til
+// lowercase siden GitHub behandler owner- og repo-navn case-insensitivt. En
+// eventuell «.git»-endelse strippes. Owner er alltid satt ved suksess; repo kan
+// være tomt dersom remote-URL-en ikke inneholder et repo-navn.
+func parseOwnerRepo(remoteURL string) (owner, repo string, err error) {
 	s := strings.TrimSpace(remoteURL)
 	if s == "" {
-		return "", fmt.Errorf("empty remote URL")
+		return "", "", fmt.Errorf("empty remote URL")
 	}
 
 	var host, path string
@@ -31,7 +33,7 @@ func parseOwner(remoteURL string) (string, error) {
 		}
 		slash := strings.Index(rest, "/")
 		if slash == -1 {
-			return "", fmt.Errorf("could not parse remote URL: %s", s)
+			return "", "", fmt.Errorf("could not parse remote URL: %s", s)
 		}
 		host, path = rest[:slash], rest[slash+1:]
 		if colon := strings.Index(host, ":"); colon != -1 {
@@ -48,18 +50,19 @@ func parseOwner(remoteURL string) (string, error) {
 		host, path = hostAndPath[:colon], hostAndPath[colon+1:]
 
 	default:
-		return "", fmt.Errorf("could not parse remote URL: %s", s)
+		return "", "", fmt.Errorf("could not parse remote URL: %s", s)
 	}
 
 	if strings.ToLower(host) != "github.com" {
-		return "", fmt.Errorf("origin is not a github.com repository: %s", s)
+		return "", "", fmt.Errorf("origin is not a github.com repository: %s", s)
 	}
 
 	path = strings.TrimPrefix(path, "/")
-	owner, _, _ := strings.Cut(path, "/")
-	owner = strings.TrimSuffix(owner, ".git")
-	if owner == "" {
-		return "", fmt.Errorf("could not determine owner from origin: %s", s)
+	ownerPart, repoPart, _ := strings.Cut(path, "/")
+	ownerPart = strings.TrimSuffix(ownerPart, ".git")
+	repoPart = strings.TrimSuffix(repoPart, ".git")
+	if ownerPart == "" {
+		return "", "", fmt.Errorf("could not determine owner from origin: %s", s)
 	}
-	return strings.ToLower(owner), nil
+	return strings.ToLower(ownerPart), strings.ToLower(repoPart), nil
 }
