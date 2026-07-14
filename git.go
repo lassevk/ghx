@@ -7,9 +7,9 @@ import (
 	"strings"
 )
 
-// gitOriginURL returnerer URL-en til «origin»-remoten for repoet i gjeldende
-// katalog. «Ikke i et git-repo» og «ingen origin» skilles ut som tydelige
-// feil, siden begge er «bom»-tilfeller som skal føre til hard feil.
+// gitOriginURL returns the URL of the "origin" remote for the repo in the
+// current directory. "Not in a git repo" and "no origin" are surfaced as
+// distinct errors, since both are miss cases that should fail hard.
 func gitOriginURL() (string, error) {
 	cmd := exec.Command("git", "remote", "get-url", "origin")
 	var stderr bytes.Buffer

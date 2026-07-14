@@ -10,36 +10,36 @@ func TestParseOwnerRepo(t *testing.T) {
 		wantRepo  string
 		wantErr   bool
 	}{
-		// SCP-lignende SSH
-		{"scp med .git", "git@github.com:lassevk/ghx.git", "lassevk", "ghx", false},
-		{"scp uten .git", "git@github.com:lassevk/ghx", "lassevk", "ghx", false},
+		// SCP-like SSH
+		{"scp with .git", "git@github.com:lassevk/ghx.git", "lassevk", "ghx", false},
+		{"scp without .git", "git@github.com:lassevk/ghx", "lassevk", "ghx", false},
 		{"scp org", "git@github.com:Larvik-Kommune/foo.git", "larvik-kommune", "foo", false},
 
-		// SSH-URL
-		{"ssh-url med .git", "ssh://git@github.com/lassevk/ghx.git", "lassevk", "ghx", false},
-		{"ssh-url uten .git", "ssh://git@github.com/lassevk/ghx", "lassevk", "ghx", false},
+		// SSH URL
+		{"ssh-url with .git", "ssh://git@github.com/lassevk/ghx.git", "lassevk", "ghx", false},
+		{"ssh-url without .git", "ssh://git@github.com/lassevk/ghx", "lassevk", "ghx", false},
 
 		// HTTPS
-		{"https med .git", "https://github.com/lassevk/ghx.git", "lassevk", "ghx", false},
-		{"https uten .git", "https://github.com/lassevk/ghx", "lassevk", "ghx", false},
-		{"https med port", "https://github.com:443/lassevk/ghx.git", "lassevk", "ghx", false},
+		{"https with .git", "https://github.com/lassevk/ghx.git", "lassevk", "ghx", false},
+		{"https without .git", "https://github.com/lassevk/ghx", "lassevk", "ghx", false},
+		{"https with port", "https://github.com:443/lassevk/ghx.git", "lassevk", "ghx", false},
 
-		// Case-insensitivitet — både owner og repo lowercases
-		{"blandet case owner+repo", "https://github.com/LasseVK/Ghx.git", "lassevk", "ghx", false},
-		{"blandet case host", "git@GitHub.com:lassevk/ghx.git", "lassevk", "ghx", false},
+		// Case-insensitivity — both owner and repo are lowercased
+		{"mixed case owner+repo", "https://github.com/LasseVK/Ghx.git", "lassevk", "ghx", false},
+		{"mixed case host", "git@GitHub.com:lassevk/ghx.git", "lassevk", "ghx", false},
 
-		// Owner uten repo → owner satt, repo tomt
-		{"owner uten repo", "git@github.com:lassevk", "lassevk", "", false},
+		// Owner without repo → owner set, repo empty
+		{"owner without repo", "git@github.com:lassevk", "lassevk", "", false},
 
-		// Ikke-github → feil
+		// Non-github → error
 		{"gitlab https", "https://gitlab.com/lassevk/ghx.git", "", "", true},
 		{"bitbucket scp", "git@bitbucket.org:lassevk/ghx.git", "", "", true},
 		{"enterprise", "git@github.larvik.no:lassevk/ghx.git", "", "", true},
 
-		// Ugyldig → feil
-		{"tom", "", "", "", true},
-		{"tull", "bare-noe-tekst", "", "", true},
-		{"github uten owner", "https://github.com/", "", "", true},
+		// Invalid → error
+		{"empty", "", "", "", true},
+		{"garbage", "just-some-text", "", "", true},
+		{"github without owner", "https://github.com/", "", "", true},
 	}
 
 	for _, tt := range tests {

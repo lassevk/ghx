@@ -1,6 +1,6 @@
-// Command ghx er en tynn wrapper rundt `gh` som utleder repoets owner fra
-// origin-remoten og kjører `gh` med riktig personal access token satt i
-// GH_TOKEN. Se README for bakgrunn.
+// Command ghx is a thin wrapper around `gh` that derives the repo's owner from
+// the origin remote and runs `gh` with the right personal access token set in
+// GH_TOKEN. See the README for background.
 package main
 
 import (
@@ -16,8 +16,9 @@ func main() {
 	}
 }
 
-// run utfører hele flyten: utled owner fra origin, slå opp token i config, og
-// exec `gh`. Ved enhver «bom» returneres en feil og `gh` kjøres aldri.
+// run performs the whole flow: derive the owner from origin, look up the token
+// in the config, and exec `gh`. On any miss it returns an error and `gh` is
+// never run.
 func run(args []string) error {
 	debug := os.Getenv("GHX_DEBUG") == "1"
 
@@ -47,7 +48,7 @@ func run(args []string) error {
 		return err
 	}
 
-	// Mest spesifikk vinner: prøv owner/repo først, fall så tilbake til owner.
+	// Most specific wins: try owner/repo first, then fall back to owner.
 	var token string
 	switch {
 	case repo != "" && tokens[repoKey] != "":
@@ -71,14 +72,13 @@ func run(args []string) error {
 		return fmt.Errorf("no token configured for '%s' in %s", owner, configPath())
 	}
 
-	// execGh returnerer bare hvis noe gikk galt før gh overtok prosessen.
+	// execGh only returns if something went wrong before gh took over the process.
 	return execGh(args, token)
 }
 
-// buildEnv returnerer et miljø likt det gjeldende, men med GH_TOKEN satt til
-// token og eventuelle eksisterende GH_TOKEN/GITHUB_TOKEN fjernet, slik at det
-// ikke er tvil om hvilket token gh bruker. Plattform-nøytral og delt av
-// execGh på alle OS.
+// buildEnv returns an environment like the current one, but with GH_TOKEN set to
+// token and any existing GH_TOKEN/GITHUB_TOKEN removed, so there's no ambiguity
+// about which token gh uses. Platform-neutral and shared by execGh on all OSes.
 func buildEnv(token string) []string {
 	base := os.Environ()
 	env := make([]string, 0, len(base)+1)

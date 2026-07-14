@@ -7,19 +7,20 @@ import (
 	"os/exec"
 )
 
-// execGh kjører `gh` som en underprosess med GH_TOKEN satt til token og alle
-// args uendret videre. stdin/stdout/stderr wires rett gjennom, og gh sin
-// exit-kode propageres uendret.
+// execGh runs `gh` as a subprocess with GH_TOKEN set to token and all args
+// passed through unchanged. stdin/stdout/stderr are wired straight through, and
+// gh's exit code is propagated unchanged.
 //
-// Dette erstatter den Unix-only syscall.Exec-sømmen fra #5 (se #8). exec.Command
-// er portabel og gir Windows/macOS/Linux-paritet ut av boksen. Vi installerer
-// bevisst ingen egen signalhåndtering: konsollen (Windows) og prosessgruppa
-// (Unix) leverer Ctrl+C direkte til gh, som eier terminalen mens den kjører.
-// Å legge et handler i ghx ville enten stjålet signalet fra gh eller doblet det.
+// This replaces the Unix-only syscall.Exec seam from #5 (see #8). exec.Command
+// is portable and gives Windows/macOS/Linux parity out of the box. We
+// deliberately install no signal handling of our own: the console (Windows) and
+// the process group (Unix) deliver Ctrl+C directly to gh, which owns the
+// terminal while it runs. Adding a handler in ghx would either steal the signal
+// from gh or double it.
 //
-// Ved suksess returnerer denne funksjonen aldri — den avslutter prosessen med
-// gh sin exit-kode. Den returnerer bare en feil for tilfeller der gh ikke kunne
-// startes i det hele tatt (ikke funnet i PATH, eller kunne ikke spawnes).
+// On success this function never returns — it exits the process with gh's exit
+// code. It only returns an error for cases where gh could not be started at all
+// (not found in PATH, or could not be spawned).
 func execGh(args []string, token string) error {
 	ghPath, err := exec.LookPath("gh")
 	if err != nil {
@@ -33,16 +34,16 @@ func execGh(args []string, token string) error {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		// gh kjørte, men avsluttet med ikke-null kode: speil koden uten å pakke
-		// den inn i en «ghx:»-feilmelding, slik at wrapperen er transparent.
+		// gh ran, but exited with a non-zero code: mirror the code without
+		// wrapping it in a "ghx:" error message, so the wrapper stays transparent.
 		var exitErr *exec.ExitError
 		if errors.As(err, &exitErr) {
 			os.Exit(exitErr.ExitCode())
 		}
-		// gh kunne ikke startes (f.eks. binæren forsvant mellom LookPath og Run).
+		// gh could not be started (e.g. the binary vanished between LookPath and Run).
 		return fmt.Errorf("could not run gh: %w", err)
 	}
 
 	os.Exit(0)
-	return nil // ikke nåbar; tilfredsstiller kompilatoren
+	return nil // unreachable; satisfies the compiler
 }
